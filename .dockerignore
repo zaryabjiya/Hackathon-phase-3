@@ -1,0 +1,25 @@
+venv*/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.git/
+.github/
+.vscode/
+.idea/
+
+# local secrets
+.env
+
+# local DB / artifacts
+todo_app.db
+*.sqlite
+*.sqlite3
+
+# OS
+Thumbs.db
+Desktop.ini
+
