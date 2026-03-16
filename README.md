@@ -1,110 +1,257 @@
----
-title: todohack
-sdk: docker
-app_port: 7860
+# TaskMaster - Multi-User Todo Application with AI Chatbot
+
+TaskMaster is a full-stack web application that allows users to create, manage, and track their personal tasks with secure authentication and user isolation. **Phase III** adds an intelligent AI chatbot powered by OpenAI with native tool calling for natural language task management.
+
+## 🚀 Quick Start
+
+### First Time Setup
+
+```bash
+# Run the development setup script
+.\start-dev.bat
+```
+
+This will automatically:
+- Set up Python virtual environment
+- Install all dependencies (backend + frontend)
+- Start both servers
+
+### Subsequent Runs
+
+```bash
+# Quick start (dependencies already installed)
+.\start.bat
+```
+
+### Access the Application
+
+- **Frontend:** http://localhost:3000
+- **Backend API:** http://localhost:8000
+- **API Documentation:** http://localhost:8000/docs
+
 ---
 
-# Todo Backend API
+## 🤖 AI Chatbot Setup (Phase III)
 
-This is the backend for the Todo Full-Stack Web Application (Phase II). It provides a secure REST API for managing user tasks with JWT-based authentication.
+The chatbot uses **OpenAI GPT-4o-mini** with native tool calling for reliable task management.
+
+### Configure OpenAI API Key
+
+1. Get your API key from [OpenAI Platform](https://platform.openai.com/api-keys)
+
+2. Edit `backend\.env` and add your key:
+
+```env
+OPENAI_API_KEY=sk-proj-your-actual-api-key-here
+```
+
+3. Restart the backend:
+
+```bash
+cd backend
+python -m uvicorn main:app --reload
+```
+
+### Test the Chatbot
+
+**Option 1: Via Frontend**
+- Open http://localhost:3000
+- Login to your account
+- Click the chat icon (bottom-right)
+- Try: "Add a task to practice math tomorrow at 3pm"
+
+**Option 2: Via Test Script**
+```bash
+cd backend
+python test_chatbot.py
+```
+
+### Available Commands
+
+| Command | Example |
+|---------|---------|
+| Add Task | "Add a task to buy groceries due tomorrow" |
+| List Tasks | "Show my pending/high priority/overdue tasks" |
+| Complete Task | "Mark task 3 as complete" |
+| Delete Task | "Delete task 5" (confirms first) |
+| Update Task | "Update task 2 title to 'New meeting'" |
+| Search Tasks | "Find tasks about 'meeting'" |
+| Get Stats | "Show my productivity summary" |
+| Smart Filters | "What's due today/this week?" |
+
+---
+
+## 📖 Complete Setup Guide
+
+For detailed instructions, troubleshooting, and manual setup, see [SETUP_GUIDE.md](SETUP_GUIDE.md).
+
+## Features
+
+- **User Authentication**: Secure registration and login with JWT tokens
+- **Task Management**: Create, read, update, and delete tasks
+- **User Isolation**: Users can only access their own tasks
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **Real-time Updates**: Tasks update immediately after changes
+- **Filtering**: Filter tasks by status (all, active, completed)
+- **AI Chatbot** (Phase III): Natural language task management with OpenAI
 
 ## Tech Stack
 
-- Python 3.9+
-- FastAPI
-- SQLModel
-- Better Auth
-- Neon Serverless PostgreSQL
-- PyJWT
-- Uvicorn
+### Backend
+- **Framework**: FastAPI
+- **Database**: PostgreSQL (with Neon Serverless)
+- **ORM**: SQLModel
+- **Authentication**: JWT with custom middleware
+- **Dependencies**: 
+  - fastapi==0.104.1
+  - sqlmodel==0.0.16
+  - pydantic==2.5.0
+  - passlib[bcrypt]==1.7.4
+  - python-jose[cryptography]==3.3.0
 
-## Environment Variables
+### Frontend
+- **Framework**: Next.js 16+
+- **Styling**: Tailwind CSS
+- **State Management**: React Context API
+- **Animations**: Framer Motion
+- **Authentication**: Better Auth
+- **Dependencies**:
+  - react, react-dom
+  - next
+  - tailwindcss
+  - better-auth
+  - framer-motion
 
-Create a `.env` file (for local development) with the following variables:
+## Getting Started
 
-```env
-# JWT signing secret (keep this private)
-SECRET_KEY=change-me
+### Prerequisites
 
-# DB connection string
-# - For local dev: sqlite:///todo_app.db
-# - For Postgres: postgresql://USER:PASSWORD@HOST:PORT/DBNAME
-DATABASE_URL=sqlite:///todo_app.db
+- Node.js 18+
+- Python 3.11+
+- Docker (for database)
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone https://github.com/your-org/todo-fullstack-app.git
+cd todo-fullstack-app
 ```
 
-## Installation
-
-1. Clone the repository
-2. Navigate to the backend directory
-3. Install dependencies:
-
+2. Set up environment variables:
 ```bash
+cp .env.example .env
+```
+Then update the values in `.env` with your specific configuration.
+
+3. Install backend dependencies:
+```bash
+cd backend
 pip install -r requirements.txt
 ```
 
-## Running the Application (Local)
-
+4. Install frontend dependencies:
 ```bash
-uvicorn main:app --reload --port 8000
+cd ../frontend
+npm install
 ```
 
-## Running on Hugging Face Spaces (Docker)
+### Running the Application
 
-This repo is set up as a Docker Space. The container runs `uvicorn` and binds to `$PORT` (default `7860`).
+1. Start the database with Docker:
+```bash
+docker-compose up -d
+```
 
-The API will be available at `http://localhost:8000`.
+2. Start the backend:
+```bash
+cd backend
+uvicorn src.main:app --reload --port 8000
+```
+
+3. In a new terminal, start the frontend:
+```bash
+cd frontend
+npm run dev
+```
+
+4. Access the application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000
+   - Backend Docs: http://localhost:8000/docs
 
 ## API Endpoints
 
 ### Authentication
+- `POST /auth/register` - Register a new user
+- `POST /auth/login` - Authenticate a user
+- `POST /auth/logout` - Log out a user
 
-Authentication is handled by Better Auth and available at `/api/auth/*`.
+### Tasks
+- `GET /users/{user_id}/tasks` - Get user's tasks
+- `POST /users/{user_id}/tasks` - Create a new task
+- `GET /users/{user_id}/tasks/{task_id}` - Get a specific task
+- `PUT /users/{user_id}/tasks/{task_id}` - Update a task
+- `PATCH /users/{user_id}/tasks/{task_id}/complete` - Toggle task completion
+- `DELETE /users/{user_id}/tasks/{task_id}` - Delete a task
 
-### Task Management
+## Project Structure
 
-All task endpoints require JWT authentication in the Authorization header: `Authorization: Bearer <token>`
-
-- `GET /api/{user_id}/tasks` - Get all tasks for the user
-- `POST /api/{user_id}/tasks` - Create a new task
-- `GET /api/{user_id}/tasks/{id}` - Get a specific task
-- `PUT /api/{user_id}/tasks/{id}` - Update a specific task
-- `DELETE /api/{user_id}/tasks/{id}` - Delete a specific task
-- `PATCH /api/{user_id}/tasks/{id}/complete` - Toggle task completion status
-
-### Query Parameters for GET /api/{user_id}/tasks
-
-- `status` (optional): Filter by status - "all", "pending", "completed" (default: "all")
-- `sort` (optional): Sort by - "created", "title", "due_date" (default: "created")
-
-## Database Migrations
-
-To run database migrations:
-
-```bash
-# Using Alembic (if configured)
-alembic upgrade head
+```
+todo-fullstack-app/
+├── backend/
+│   ├── src/
+│   │   ├── models/      # Database models
+│   │   ├── api/         # API routes
+│   │   ├── services/    # Business logic
+│   │   ├── middleware/  # Authentication, etc.
+│   │   └── utils/       # Utility functions
+│   ├── tests/           # Backend tests
+│   └── requirements.txt # Python dependencies
+├── frontend/
+│   ├── src/
+│   │   ├── app/         # Next.js app router pages
+│   │   ├── components/  # Reusable UI components
+│   │   ├── providers/   # Context providers
+│   │   ├── lib/         # Utilities and API client
+│   │   ├── hooks/       # Custom React hooks
+│   │   └── styles/      # Global styles
+│   ├── tests/           # Frontend tests
+│   ├── package.json     # Node.js dependencies
+│   └── tailwind.config.js # Tailwind CSS config
+├── docker-compose.yml   # Docker configuration
+└── .env.example         # Environment variables example
 ```
 
-## Security Features
+## Security
 
-- JWT-based authentication
-- User isolation (users can only access their own tasks)
-- Input validation
-- Proper error handling
-- CORS configured for frontend origin (http://localhost:3000)
+- All API endpoints require authentication via JWT tokens
+- User isolation is enforced at the API level - users can only access their own tasks
+- Passwords are hashed using bcrypt
+- Input validation is performed on both frontend and backend
 
 ## Testing
 
-To run tests:
-
+To run backend tests:
 ```bash
+cd backend
 pytest
 ```
 
-## Frontend Integration
+To run frontend tests:
+```bash
+cd frontend
+npm test
+```
 
-The backend is designed to work with a frontend at `http://localhost:3000`. The frontend should:
+## Contributing
 
-1. Authenticate users via `/api/auth/*` endpoints
-2. Include JWT tokens in the Authorization header for task endpoints
-3. Pass the authenticated user's ID in the URL path for task operations
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
