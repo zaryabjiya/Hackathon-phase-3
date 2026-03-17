@@ -1,5 +1,5 @@
 declare module 'canvas-confetti' {
-  export interface Options {
+  interface ConfettiOptions {
     particleCount?: number;
     angle?: number;
     spread?: number;
@@ -7,11 +7,14 @@ declare module 'canvas-confetti' {
     decay?: number;
     gravity?: number;
     drift?: number;
+    flat?: boolean;
     ticks?: number;
-    origin?: { x?: number; y?: number };
+    origin?: {
+      x?: number;
+      y?: number;
+    };
     colors?: string[];
     shapes?: string[];
-    scalar?: number;
     zIndex?: number;
     disableForReducedMotion?: boolean;
     useWorker?: boolean;
@@ -19,11 +22,11 @@ declare module 'canvas-confetti' {
     canvas?: HTMLCanvasElement;
   }
 
-  export interface CreateTypesConfetti {
-    (options?: Options): void;
+  interface ConfettiInstance {
+    (options?: ConfettiOptions): void;
     reset(): void;
   }
 
-  export default function confetti(options?: Options): void;
-  export function create(canvas: HTMLCanvasElement): CreateTypesConfetti;
+  const confetti: ConfettiInstance;
+  export default confetti;
 }
