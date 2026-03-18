@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlparse, parse_qs
 from sqlmodel import SQLModel, Session, create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import sessionmaker
@@ -31,14 +32,18 @@ def parse_database_url(url: str) -> tuple[str, dict]:
         if not url.startswith("postgresql+asyncpg://"):
             url = "postgresql+asyncpg://" + url.lstrip("postgresql://")
     
-    # Handle SSL mode for Neon/cloud databases
-    if "?sslmode=require" in url:
-        url = url.replace("?sslmode=require", "")
-        connect_args = {"ssl": "require"}
-    elif "?ssl=true" in url:
-        url = url.replace("?ssl=true", "")
-        connect_args = {"ssl": "require"}
-
+    # Handle SSL mode for Neon/cloud databases - parse URL properly
+    if "?" in url:
+        # Split URL into path and query
+        base_url, query_string = url.split("?", 1)
+        # Parse query parameters
+        params = parse_qs(query_string)
+        # Check for sslmode
+        if "sslmode" in params:
+            connect_args = {"ssl": "require"}
+        # Rebuild URL without query params
+        url = base_url
+    
     return url, connect_args
 
 async_database_url, connect_args = parse_database_url(DATABASE_URL)
