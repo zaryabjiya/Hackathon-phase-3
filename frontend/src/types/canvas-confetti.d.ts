@@ -20,6 +20,7 @@ declare module 'canvas-confetti' {
     useWorker?: boolean;
     resize?: boolean;
     canvas?: HTMLCanvasElement;
+    scalar?: number;
   }
 
   interface ConfettiInstance {
